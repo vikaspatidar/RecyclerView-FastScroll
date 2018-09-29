@@ -26,13 +26,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.support.annotation.ColorInt;
-import android.support.annotation.IntDef;
-import android.support.annotation.Keep;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.ColorInt;
+import androidx.annotation.IntDef;
+import androidx.annotation.Keep;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -53,6 +54,7 @@ public class FastScroller {
 
     private int mThumbHeight;
     private int mWidth;
+    private int mCornerRadius;
 
     private Paint mThumb;
     private Paint mTrack;
@@ -69,7 +71,7 @@ public class FastScroller {
     private int mTouchOffset;
 
     private Point mThumbPosition = new Point(-1, -1);
-    private Point mOffset = new Point(0, 0);
+    private Point mOffset = new Point(0, 16);
 
     private boolean mIsDragging;
 
@@ -99,6 +101,7 @@ public class FastScroller {
 
         mThumbHeight = Utils.toPixels(resources, 48);
         mWidth = Utils.toPixels(resources, 8);
+        mCornerRadius = Utils.toPixels(resources, 8);
 
         mTouchInset = Utils.toPixels(resources, -24);
 
@@ -235,16 +238,27 @@ public class FastScroller {
     }
 
     public void draw(Canvas canvas) {
-
         if (mThumbPosition.x < 0 || mThumbPosition.y < 0) {
             return;
         }
 
         //Background
-        canvas.drawRect(mThumbPosition.x + mOffset.x, mOffset.y, mThumbPosition.x + mOffset.x + mWidth, mRecyclerView.getHeight() + mOffset.y, mTrack);
+        canvas.drawRoundRect(new RectF(mThumbPosition.x + mOffset.x,
+                mOffset.y,
+                mThumbPosition.x + mOffset.x + mWidth,
+                mRecyclerView.getHeight() - mOffset.y),
+                mCornerRadius,
+                mCornerRadius,
+                mTrack);
 
         //Handle
-        canvas.drawRect(mThumbPosition.x + mOffset.x, mThumbPosition.y + mOffset.y, mThumbPosition.x + mOffset.x + mWidth, mThumbPosition.y + mOffset.y + mThumbHeight, mThumb);
+        canvas.drawRoundRect(new RectF(mThumbPosition.x + mOffset.x,
+                mThumbPosition.y + mOffset.y,
+                mThumbPosition.x + mOffset.x + mWidth,
+                mThumbPosition.y - mOffset.y + mThumbHeight),
+                mCornerRadius,
+                mCornerRadius,
+                mThumb);
 
         //Popup
         mPopup.draw(canvas);
